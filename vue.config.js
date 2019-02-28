@@ -14,6 +14,7 @@ module.exports = {
     }
   },
 */
+  publicPath: process.env.NODE_ENV === 'production' ? '/TaiwanAirQualityInfo/' : '/',
   configureWebpack: config => {
     if (isProduction) {
       config.plugins.push(new CompressionWebpackPlugin({
