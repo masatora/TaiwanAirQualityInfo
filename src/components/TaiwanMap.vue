@@ -191,7 +191,7 @@ export default {
     },
     _getAqiJsonData() {
       return new Promise((resolve, reject) => {
-        jsonp('http://opendata.epa.gov.tw/api/v1/AQI?$skip=0&$top=1000&$format=json', null, (err, res) => {
+        jsonp('https://opendata.epa.gov.tw/api/v1/AQI?$skip=0&$top=1000&$format=json', null, (err, res) => {
           if(err) {
             reject(err)
           } else {
