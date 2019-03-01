@@ -39,7 +39,7 @@ export default {
   },
   methods: {
     _getBaseLayer() {
-      let mapSource = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+      let mapSource = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
       //let mapSource = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
       let baseLayer = L.tileLayer(mapSource, {
         attribution: '',
