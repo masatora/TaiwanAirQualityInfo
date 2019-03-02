@@ -16,7 +16,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import {feature} from 'topojson/dist/topojson.min.js'
 import twCountyTopo from '../assets/twCountyTopo.json'
-import { map, pluck, pipe, filter, sort, descend, ascend, prop } from 'ramda'
+import { map, filter } from 'ramda'
 
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -34,14 +34,15 @@ export default {
   data() {
     return {
       aqiData: [],
-      clickedArea: ''
+      clickedArea: '',
+      siteLayer: []
     }
   },
   methods: {
     _getBaseLayer() {
-      let mapSource = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+      const mapSource = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
       //let mapSource = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
-      let baseLayer = L.tileLayer(mapSource, {
+      const baseLayer = L.tileLayer(mapSource, {
         attribution: '',
         maxZoom: 19,
         minZoom: 8,
@@ -51,7 +52,7 @@ export default {
       return baseLayer
     },
     _getHeatmapLayer() {
-      let heatmapLayer = new HeatmapOverlay({
+      const heatmapLayer = new HeatmapOverlay({
         radius: 20,
         maxOpacity: .5,
         scaleRadius: false,
@@ -70,22 +71,47 @@ export default {
       return heatmapLayer
     },
     _getCountyLayer() {
-      let _this = this
-      let showInfo = this.$refs.MapFeatures.$refs.ShowInfo
-      let defaultStyle = {
+      const isEmptyCountyName = countyName => {
+        const cn = countyName
+        return d => {
+          if (d._county !== cn) {
+            d._icon.style.opacity = .2
+            d._shadow.style.opacity = .2
+          }
+        }
+      }
+      const isSameCountyName = d => {
+        d._icon.style.opacity = 1
+        d._shadow.style.opacity = 1
+      }
+      const isDifferentCountyName = countyName => {
+        const cn = countyName
+        return d => {
+          if (d._county === cn) {
+            d._icon.style.opacity = 1
+            d._shadow.style.opacity = 1
+          } else {
+            d._icon.style.opacity = .2
+            d._shadow.style.opacity = .2
+          }
+        }
+      }
+      const _this = this
+      const showInfo = this.$refs.MapFeatures.$refs.ShowInfo
+      const defaultStyle = {
         weight: 1,
         opacity: .8,
         color: '#aaaaaa',
         fillOpacity: .2,
         fillColor: '#fafafa'
       }
-      let changedStyle = {
+      const changedStyle = {
         weight: 5,
         color: '#ffffff',
         fillOpacity: .7,
         fillColor: '#111111'
       }
-      let geoLayer = L.geoJSON(feature(twCountyTopo, twCountyTopo.objects['layer1']), {
+      const geoLayer = L.geoJSON(feature(twCountyTopo, twCountyTopo.objects['layer1']), {
         style: defaultStyle,
         onEachFeature(feature, layer) {
           let props = feature.properties
@@ -95,16 +121,19 @@ export default {
           layer.on({
             click() {
               if (_this.clickedArea === '') {
+                map(isEmptyCountyName(countyName))(_this.siteLayer)
                 _this.clickedArea = countyName
                 this.setStyle(changedStyle)
                 showInfo.updateComponent(countyData)
               } else {
                 if (_this.clickedArea !== countyName) {
+                  map(isDifferentCountyName(countyName))(_this.siteLayer)
                   _this.clickedArea = countyName
                   geoLayer.setStyle(defaultStyle)
                   this.setStyle(changedStyle)
                   showInfo.updateComponent(countyData)
                 } else {
+                  map(isSameCountyName)(_this.siteLayer)
                   _this.clickedArea = ''
                   geoLayer.setStyle(defaultStyle)
                   showInfo.updateComponent()
@@ -133,10 +162,10 @@ export default {
       return geoLayer
     },
     _getMarkerIcons() {
-      let shadowUrl = 'images/marker-shadow.png'
-      let shadowAnchor = [20, 37]
-      let iconAnchor = [24, 43]
-      let tooltipAnchor = [14, -30]
+      const shadowUrl = 'images/marker-shadow.png'
+      const shadowAnchor = [20, 37]
+      const iconAnchor = [24, 43]
+      const tooltipAnchor = [14, -30]
 
       return {
         green: L.icon({iconUrl: 'images/marker-green.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor}),
@@ -149,15 +178,16 @@ export default {
       }
     },
     _getSiteLayer(countyLayer) {
-      let _this = this,
-          siteLayer = [],
-          color,
-          markerIcons = this._getMarkerIcons(),
-          showInfo = this.$refs.MapFeatures.$refs.ShowInfo
+      const _this = this
+      const siteLayer = []
+      const markerIcons = this._getMarkerIcons()
+      const showInfo = this.$refs.MapFeatures.$refs.ShowInfo
+      let color = ''
+      let marker = {}
 
       _this.aqiData.forEach(function(value) {
         color = _this.getColor(value.AQI)
-        siteLayer.push(L.marker([value.Latitude, value.Longitude], {icon: markerIcons[color]}).on({
+        marker = L.marker([value.Latitude, value.Longitude], {icon: markerIcons[color]}).on({
           click() {
             if (_this.clickedArea === '') {
               _this.clickedArea = value.SiteName
@@ -175,7 +205,9 @@ export default {
             }
             _this.$refs.MapFeatures.defaultIsHideFeature()
           }
-        }).bindTooltip(value.SiteName + ': ' + value.AQI))
+        }).bindTooltip(value.SiteName + ': ' + value.AQI)
+
+        siteLayer.push(Object.assign(marker, {_county: value.County}))
       })
 
       return siteLayer
@@ -202,14 +234,14 @@ export default {
     }
   },
   mounted() {
-    let _this = this
+    const _this = this
 
     _this._getAqiJsonData().then((res) => {
       if (res.length > 0) {
         _this.aqiData = res
-        let baseLayer = _this._getBaseLayer()
-        let countyLayer = _this._getCountyLayer()
-        let siteLayer = _this._getSiteLayer(countyLayer)
+        const baseLayer = _this._getBaseLayer()
+        const countyLayer = _this._getCountyLayer()
+        _this.siteLayer = _this._getSiteLayer(countyLayer)
         new L.map('map', {
           center: new L.LatLng(23.97361, 120.98064),
           zoom: 8,
@@ -217,11 +249,11 @@ export default {
             baseLayer,
             countyLayer,
             //_this._getHeatmapLayer()
-          ].concat(siteLayer)
+          ].concat(_this.siteLayer)
         })
       }
     }).catch((err) => {
-      alert('服務暫時無法使用')
+      alert('Service Unavailable Temporarily')
     })
   }
 }
