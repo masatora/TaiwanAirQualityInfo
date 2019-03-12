@@ -1,7 +1,9 @@
 <template>
-  <div id="MapFeatures">
-    <ShowInfo ref="ShowInfo" />
-    <BarChart ref="BarChart" />
+  <div class="row">
+    <div id="MapFeatures" class="col-xs-12 col-sm-12 col-md-4 absolute-bottom-right">
+      <ShowInfo ref="ShowInfo" />
+      <BarChart ref="BarChart" />
+    </div>
   </div>
 </template>
 
@@ -15,7 +17,7 @@ export default {
     ShowInfo,
     BarChart
   },
-  data() {
+  data () {
     return {
       isHideFeature: {
         showInfo: false,
@@ -24,7 +26,7 @@ export default {
     }
   },
   methods: {
-    setIsHideFeature(e) {
+    setIsHideFeature () {
       let obj = {
         showInfo: !this.isHideFeature.showInfo,
         barChart: !this.isHideFeature.barChart
@@ -32,7 +34,7 @@ export default {
 
       this.isHideFeature = Object.assign({}, this.isHideFeature, obj)
     },
-    defaultIsHideFeature() {
+    defaultIsHideFeature () {
       this.isHideFeature = Object.assign({}, this.isHideFeature, {
         showInfo: false,
         barChart: true
@@ -43,12 +45,15 @@ export default {
 </script>
 
 <style lang="stylus">
+@media (min-width: 320px), (max-width: 425px)
+  #MapFeatures
+    height: 30%
+
+@media (min-width: 768px)
+  #MapFeatures
+    height: 100%
+
 #MapFeatures
-  position: absolute
-  top: 0
-  right: 0
-  width: 400px
-  height: 100%
   border: 2px solid #aaaaaa
   background-color: #dddddd
   overflow-x: hidden
@@ -69,4 +74,5 @@ export default {
   -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3)
   border-radius: 50px
   background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0.44, rgb(122,153,217)), color-stop(0.72, rgb(73,125,189)), color-stop(0.86, rgb(28,58,148)))
+
 </style>

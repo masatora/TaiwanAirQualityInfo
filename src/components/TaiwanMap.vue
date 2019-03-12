@@ -11,11 +11,11 @@ import MapFeatures from './MapFeatures.vue'
 import ColorInfo from './ColorInfo.vue'
 import jsonp from 'jsonp'
 import L from 'leaflet'
-//import h337 from 'heatmap.js'
-//import HeatmapOverlay from 'heatmap.js/plugins/leaflet-heatmap'
+// import h337 from 'heatmap.js'
+// import HeatmapOverlay from 'heatmap.js/plugins/leaflet-heatmap'
 import 'leaflet/dist/leaflet.css'
-import {feature} from 'topojson/dist/topojson.min.js'
-import twCountyTopo from '../assets/twCountyTopo.json'
+import { feature } from 'topojson/dist/topojson.min.js'
+import twCountyTopo from 'assets/twCountyTopo.json'
 import { map, filter } from 'ramda'
 
 delete L.Icon.Default.prototype._getIconUrl
@@ -31,27 +31,27 @@ export default {
     MapFeatures,
     ColorInfo
   },
-  data() {
+  data () {
     return {
       aqiData: [],
       clickedArea: '',
-      siteLayer: []
+      siteLayer: [],
+      map: {}
     }
   },
   methods: {
-    _getBaseLayer() {
+    _getBaseLayer () {
       const mapSource = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-      //let mapSource = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
       const baseLayer = L.tileLayer(mapSource, {
         attribution: '',
         maxZoom: 19,
-        minZoom: 8,
-        //id: 'mapbox.light'
+        minZoom: 8
       })
 
       return baseLayer
     },
-    _getHeatmapLayer() {
+    _getHeatmapLayer () {
+      /*
       const heatmapLayer = new HeatmapOverlay({
         radius: 20,
         maxOpacity: .5,
@@ -69,14 +69,15 @@ export default {
       })
 
       return heatmapLayer
+      */
     },
-    _getCountyLayer() {
+    _getCountyLayer () {
       const isEmptyCountyName = countyName => {
         const cn = countyName
         return d => {
           if (d._county !== cn) {
-            d._icon.style.opacity = .2
-            d._shadow.style.opacity = .2
+            d._icon.style.opacity = 0.2
+            d._shadow.style.opacity = 0.2
           }
         }
       }
@@ -91,8 +92,8 @@ export default {
             d._icon.style.opacity = 1
             d._shadow.style.opacity = 1
           } else {
-            d._icon.style.opacity = .2
-            d._shadow.style.opacity = .2
+            d._icon.style.opacity = 0.2
+            d._shadow.style.opacity = 0.2
           }
         }
       }
@@ -100,26 +101,26 @@ export default {
       const showInfo = this.$refs.MapFeatures.$refs.ShowInfo
       const defaultStyle = {
         weight: 1,
-        opacity: .8,
+        opacity: 0.8,
         color: '#aaaaaa',
-        fillOpacity: .2,
+        fillOpacity: 0.2,
         fillColor: '#fafafa'
       }
       const changedStyle = {
         weight: 5,
         color: '#ffffff',
-        fillOpacity: .7,
+        fillOpacity: 0.7,
         fillColor: '#111111'
       }
       const geoLayer = L.geoJSON(feature(twCountyTopo, twCountyTopo.objects['layer1']), {
         style: defaultStyle,
-        onEachFeature(feature, layer) {
+        onEachFeature (feature, layer) {
           let props = feature.properties
           let countyName = props.name
           let countyData = filter(d => d.County === countyName)(_this.aqiData)
 
           layer.on({
-            click() {
+            click () {
               if (_this.clickedArea === '') {
                 map(isEmptyCountyName(countyName))(_this.siteLayer)
                 _this.clickedArea = countyName
@@ -141,14 +142,14 @@ export default {
               }
               _this.$refs.MapFeatures.defaultIsHideFeature()
             },
-            mouseover() {
+            mouseover () {
               if (_this.clickedArea === '') {
                 this.setStyle(changedStyle)
                 showInfo.updateComponent(countyData)
                 _this.$refs.MapFeatures.defaultIsHideFeature()
               }
             },
-            mouseout() {
+            mouseout () {
               if (_this.clickedArea === '') {
                 this.setStyle(defaultStyle)
                 showInfo.updateComponent()
@@ -161,23 +162,23 @@ export default {
 
       return geoLayer
     },
-    _getMarkerIcons() {
-      const shadowUrl = 'images/marker-shadow.png'
+    _getMarkerIcons () {
+      const shadowUrl = 'assets/images/marker-shadow.png'
       const shadowAnchor = [20, 37]
       const iconAnchor = [24, 43]
       const tooltipAnchor = [14, -30]
 
       return {
-        green: L.icon({iconUrl: 'images/marker-green.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor}),
-        yellow: L.icon({iconUrl: 'images/marker-yellow.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor}),
-        darkOrange: L.icon({iconUrl: 'images/marker-darkOrange.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor}),
-        red: L.icon({iconUrl: 'images/marker-red.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor}),
-        purple: L.icon({iconUrl: 'images/marker-purple.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor}),
-        darkred: L.icon({iconUrl: 'images/marker-darkred.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor}),
-        gray: L.icon({iconUrl: 'images/marker-gray.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor})
+        green: L.icon({ iconUrl: 'assets/images/marker-green.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor }),
+        yellow: L.icon({ iconUrl: 'assets/images/marker-yellow.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor }),
+        darkOrange: L.icon({ iconUrl: 'assets/images/marker-darkOrange.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor }),
+        red: L.icon({ iconUrl: 'assets/images/marker-red.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor }),
+        purple: L.icon({ iconUrl: 'assets/images/marker-purple.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor }),
+        darkred: L.icon({ iconUrl: 'assets/images/marker-darkred.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor }),
+        gray: L.icon({ iconUrl: 'assets/images/marker-gray.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor })
       }
     },
-    _getSiteLayer(countyLayer) {
+    _getSiteLayer (countyLayer) {
       const _this = this
       const siteLayer = []
       const markerIcons = this._getMarkerIcons()
@@ -185,10 +186,10 @@ export default {
       let color = ''
       let marker = {}
 
-      _this.aqiData.forEach(function(value) {
+      _this.aqiData.forEach((value) => {
         color = _this.getColor(value.AQI)
-        marker = L.marker([value.Latitude, value.Longitude], {icon: markerIcons[color]}).on({
-          click() {
+        marker = L.marker([value.Latitude, value.Longitude], { icon: markerIcons[color] }).on({
+          click () {
             if (_this.clickedArea === '') {
               _this.clickedArea = value.SiteName
               showInfo.updateComponent([value])
@@ -207,24 +208,34 @@ export default {
           }
         }).bindTooltip(value.SiteName + ': ' + value.AQI)
 
-        siteLayer.push(Object.assign(marker, {_county: value.County}))
+        siteLayer.push(Object.assign(marker, { _county: value.County }))
       })
 
       return siteLayer
     },
-    getColor(value) {
-      return value > 300 ? 'darkred' :// 危害
-             value > 200 ? 'purple' :// 非常不健康
-             value > 150 ? 'red' :// 對所有族群不健康
-             value > 100 ? 'darkOrange' :// 對敏感族群不健康
-             value > 50  ? 'yellow' :// 普通
-             value > 0   ? 'green' :// 良好
-                           'gray';
+    getColor (value) {
+      let result = 'gray'
+
+      if (value > 300) {
+        result = 'darkred'// 危害
+      } else if (value > 200) {
+        result = 'purple'// 非常不健康
+      } else if (value > 150) {
+        result = 'red'// 對所有族群不健康
+      } else if (value > 100) {
+        result = 'darkOrange'// 對敏感族群不健康
+      } else if (value > 50) {
+        result = 'yellow'// 普通
+      } else if (value > 0) {
+        result = 'green'// 良好
+      }
+
+      return result
     },
-    _getAqiJsonData() {
+    _getAqiJsonData () {
       return new Promise((resolve, reject) => {
         jsonp('https://opendata.epa.gov.tw/api/v1/AQI?$skip=0&$top=1000&$format=json', null, (err, res) => {
-          if(err) {
+          if (err) {
             reject(err)
           } else {
             resolve(res)
@@ -233,7 +244,7 @@ export default {
       })
     }
   },
-  mounted() {
+  mounted () {
     const _this = this
 
     _this._getAqiJsonData().then((res) => {
@@ -242,18 +253,19 @@ export default {
         const baseLayer = _this._getBaseLayer()
         const countyLayer = _this._getCountyLayer()
         _this.siteLayer = _this._getSiteLayer(countyLayer)
-        new L.map('map', {
+        _this.map = new L.Map('map', {
           center: new L.LatLng(23.97361, 120.98064),
           zoom: 8,
           layers: [
             baseLayer,
-            countyLayer,
-            //_this._getHeatmapLayer()
+            countyLayer
+            // _this._getHeatmapLayer()
           ].concat(_this.siteLayer)
         })
       }
-    }).catch((err) => {
+    }).catch(err => {
       alert('Service Unavailable Temporarily')
+      console.log(err)
     })
   }
 }

@@ -1,13 +1,17 @@
 <template>
-  <div id="bar_chart">
-    <div id="bar_chart_head">
-      <h3 @click.prevent="$parent.setIsHideFeature()">
-        <b>{{county}}AQI統計圖</b>
-      </h3>
-    </div>
-    <div id="bar_chart_body" :class="{hide: $parent.isHideFeature.barChart}">
-      <div id="main_chart">
-        <StatusInfo ref="StatusInfo" />
+  <div class="row">
+    <div id="bar_chart" class="col-xs-12 col-sm-12 col-md-11">
+      <div id="bar_chart_head">
+        <p @click.prevent="$parent.setIsHideFeature()">
+          <q-icon name="mdi-chart-bar" />&nbsp;
+          <b v-if="county !== ''">{{county}}柱狀圖</b>
+          <b v-else>各地AQI柱狀圖</b>
+        </p>
+      </div>
+      <div id="bar_chart_body" :class="{hide: $parent.isHideFeature.barChart}">
+        <div id="main_bar_chart">
+          <StatusInfo ref="StatusInfo" />
+        </div>
       </div>
     </div>
   </div>
@@ -23,20 +27,20 @@ export default {
   components: {
     StatusInfo
   },
-  data() {
+  data () {
     return {
       county: ''
     }
   },
   methods: {
-    _getAscendArgs(countyData) {
+    _getAscendArgs (countyData) {
       let sortAQI = pipe(prop('AQI'), (s) => s * 1)
       let getAscendAQI = pipe(sort(ascend(sortAQI)), pluck('AQI'))
       let getAscendSiteName = pipe(sort(ascend(sortAQI)), pluck('SiteName'))
       let y = getAscendAQI(countyData)
       let x = getAscendSiteName(countyData)
       let args = [{
-        y: [y], 
+        y: [y],
         x: [x],
         text: [y],
         marker: this._getMarkerArgs(y),
@@ -44,14 +48,14 @@ export default {
       }]
       return args
     },
-    _getDescendArgs(countyData) {
+    _getDescendArgs (countyData) {
       let sortAQI = pipe(prop('AQI'), (s) => s * 1)
       let getDescendAQI = pipe(sort(descend(sortAQI)), pluck('AQI'))
       let getDescendSiteName = pipe(sort(descend(sortAQI)), pluck('SiteName'))
       let y = getDescendAQI(countyData)
       let x = getDescendSiteName(countyData)
       let args = [{
-        y: [y], 
+        y: [y],
         x: [x],
         text: [y],
         marker: this._getMarkerArgs(y),
@@ -59,14 +63,14 @@ export default {
       }]
       return args
     },
-    _getMarkerArgs(value) {
+    _getMarkerArgs (value) {
       return {
         color: map(this.$parent.$parent.getColor)(value),
         opacity: 0.6,
-        line: {width: 1.5}
+        line: { width: 1.5 }
       }
     },
-    drawChart(county) {
+    drawChart (county) {
       if (county !== '' && this.county !== county) {
         let aqiData = this.$parent.$parent.aqiData
         let countyData = filter(d => d.County === county)(aqiData)
@@ -92,6 +96,13 @@ export default {
             t: 10
           },
           updatemenus: [{
+            direction: 'left',
+            showactive: true,
+            type: 'buttons',
+            x: 0,
+            xanchor: 'auto',
+            y: 1.15,
+            yanchor: 'auto',
             buttons: [{
               args: [{
                 x: [xValue],
@@ -103,26 +114,20 @@ export default {
               method: 'restyle'
             }, {
               args: this._getAscendArgs(countyData),
-              label: '由小至大',
+              label: '升冪',
               method: 'restyle'
             }, {
               args: this._getDescendArgs(countyData),
-              label:'由大至小',
-              method:'restyle'
-            }],
-              direction: 'left',
-              showactive: true,
-              type: 'buttons',
-              x: 0,
-              xanchor: 'auto',
-              y: 1.15,
-              yanchor: 'auto'
+              label: '降冪',
+              method: 'restyle'
+            }]
           }]
         }
-        let config = {responsive: true, displayModeBar: false, scrollZoom: true}
-        Plotly.newPlot('main_chart', data, layout, config)
+
+        let config = { responsive: true, displayModeBar: false, scrollZoom: true }
+        Plotly.newPlot('main_bar_chart', data, layout, config)
         this.county = county
-        this.$refs.StatusInfo.init('main_chart')
+        this.$refs.StatusInfo.init('main_bar_chart')
       }
     }
   }
@@ -132,7 +137,6 @@ export default {
 <style lang="stylus">
 #bar_chart
   margin: 10px auto
-  width: 370px
   height: auto
   padding: 6px 8px
   background: white
@@ -144,20 +148,20 @@ export default {
     border-bottom: 8px solid #aaaaaa
     border-radius: 2px
 
-    h3
+    p
       margin: 0 0 5px
-      line-height: 56px
+      font-size: 28px
       text-align: center
       color: #777777
 
-    h3:hover
+    p:hover
       cursor: pointer
       background-color: #f1f1f1
 
   #bar_chart_body
-    width: 370px
+    width: 100%
 
-    #main_chart
-      width: 370px
-      min-width: 340px
+    #main_bar_chart
+      width: 100%
+
 </style>

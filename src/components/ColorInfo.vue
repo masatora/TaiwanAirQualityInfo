@@ -1,10 +1,10 @@
 <template>
-  <div id="color_info">
+  <div id="color_info" class="mobile-hide absolute-bottom-left">
     <div id="color_info_container">
       <ul>
         <li v-for="(value, key, index) in condition" :key="index">
           <span :class="key">
-            <fa icon="square" />
+            <q-icon name="mdi-square" />
           </span>&nbsp;
           <span>{{value}}</span>
         </li>
@@ -16,7 +16,7 @@
 <script>
 export default {
   name: 'ColorInfo',
-  data() {
+  data () {
     return {
       condition: {
         green: '良好 (0~50)',
@@ -34,9 +34,6 @@ export default {
 
 <style lang="stylus">
 #color_info
-  position: absolute
-  left: 0
-  bottom: 0
   width: 280px
   height: 220px
   font-size: 14px
@@ -70,4 +67,5 @@ export default {
         span:nth-child(1)
           width: 30px
           height: 30px
+
 </style>

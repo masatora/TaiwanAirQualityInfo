@@ -12,13 +12,13 @@
 export default {
   name: 'StatusInfo',
   methods: {
-    init(chartId) {
+    init (chartId) {
       let timer = 0
       let chart = document.getElementById(chartId)
       let statusInfo = chart.querySelector('.status_info')
       let statusInfoP = statusInfo.getElementsByTagName('p')
 
-      chart.on('plotly_hover', function(data) {
+      chart.on('plotly_hover', data => {
         if (data.points[0]) {
           clearTimeout(timer)
           let idx = data.points[0].pointIndex
@@ -39,19 +39,19 @@ export default {
           statusInfoP[1].innerHTML = '空氣品質 : ' + '<i><b>' + siteData.Status + '</b></i>'
           statusInfoP[2].innerHTML = '空氣污染指標物 : ' + '<i><b>' + (siteData.Pollutant || '無') + '</b></i>'
         }
-      }).on('plotly_unhover', function() {
-        timer = setTimeout(function() {
+      }).on('plotly_unhover', () => {
+        timer = setTimeout(() => {
           if (timer > 0) {
             statusInfo.style.display = 'none'
           }
         }, 200)
       })
 
-      statusInfo.onmouseover = function() {
+      statusInfo.onmouseover = () => {
         clearTimeout(timer)
       }
-      statusInfo.onmouseout = function() {
-        timer = setTimeout(function() {
+      statusInfo.onmouseout = () => {
+        timer = setTimeout(() => {
           if (timer > 0) {
             statusInfo.style.display = 'none'
           }
@@ -63,7 +63,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.status_info 
+.status_info
   display: none
   position: absolute
   top: 0
@@ -76,12 +76,13 @@ export default {
   border: 3px solid #cccccc
   border-radius: 5px
 
-  p 
+  p
     font-size: 12px
     line-height: 4px
     color: #555555
 
-  p:first-child 
+  p:first-child
     text-align: center
     font-size: 16px
+
 </style>
