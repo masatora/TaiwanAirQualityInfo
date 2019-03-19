@@ -1,9 +1,9 @@
 <template>
   <div class="status_info">
     <p></p>
-    <hr/>
+    <hr />
     <p></p>
-    <hr/>
+    <hr />
     <p></p>
   </div>
 </template>
@@ -23,18 +23,14 @@ export default {
           clearTimeout(timer)
           let idx = data.points[0].pointIndex
           let siteData = data.points[0].data.countyData[idx]
-          let xOffset = 15 * idx
-          let yOffset = 70 + 150
+          let x = data.event.pointerX
+          let y = data.event.pointerY
+          let xOffset = ((x + 180) > document.getElementById('bar_chart').offsetWidth) ? 150 : 0
+          let yOffset = 30 + 150
 
-          statusInfo.style.left = (data.event.pointerX - xOffset) + 'px'
-          statusInfo.style.top = (data.event.pointerY + yOffset) + 'px'
+          statusInfo.style.left = (x - xOffset) + 'px'
+          statusInfo.style.top = (y + yOffset) + 'px'
           statusInfo.style.display = 'inline'
-          if (siteData.Status.length > 2 || siteData.Pollutant.length > 2) {
-            statusInfo.style.width = (150 + (Math.max(siteData.Status.length, siteData.Pollutant.length) * 6)) + 'px'
-          } else {
-            statusInfo.style.width = '150px'
-          }
-
           statusInfoP[0].innerHTML = '<b>' + siteData.SiteName + '</b>'
           statusInfoP[1].innerHTML = '空氣品質 : ' + '<i><b>' + siteData.Status + '</b></i>'
           statusInfoP[2].innerHTML = '空氣污染指標物 : ' + '<i><b>' + (siteData.Pollutant || '無') + '</b></i>'
@@ -68,7 +64,7 @@ export default {
   position: absolute
   top: 0
   left: 0
-  width: 150px
+  width: 180px
   height: 110px
   padding: 10px
   opacity: 0.9

@@ -37,35 +37,35 @@ module.exports = function (ctx) {
       // port: 8080,
       open: false // opens browser window automatically
     },
-    framework: 'all',// --- includes everything; for dev only!
-    /*
+    // framework: 'all' // --- includes everything; for dev only!
     framework: {
       components: [
-        'QLayout',
-        'QLayoutHeader',
-        'QLayoutDrawer',
-        'QPageContainer',
-        'QPage',
-        'QToolbar',
-        'QToolbarTitle',
-        'QBtn',
         'QIcon',
+        'QKnob',
+        'QBtn',
+        'QCard',
         'QList',
-        'QListHeader',
         'QItem',
+        'QItemSide',
+        'QItemTile',
         'QItemMain',
-        'QItemSide'
+        'QSpinnerCircles'
       ],
       directives: [
-        'Ripple'
+        'TouchPan'
       ],
       // Quasar plugins
-      plugins: [
-        'Notify'
-      ]
+      plugins: ['Loading'],
+      config: {
+        loading: {
+          spinner: 'QSpinnerCircles',
+          message: 'Now Loading',
+          spinnerSize: 150
+        }
+      }
       // iconSet: ctx.theme.mat ? 'material-icons' : 'ionicons'
       // i18n: 'de' // Quasar language
-    },*/
+    },
     // animations: 'all' --- includes all animations
     animations: [],
     ssr: {

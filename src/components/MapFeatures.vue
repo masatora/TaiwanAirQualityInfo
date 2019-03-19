@@ -1,8 +1,12 @@
 <template>
   <div class="row">
     <div id="MapFeatures" class="col-xs-12 col-sm-12 col-md-4 absolute-bottom-right">
+      <div id="feature_touch_pan" v-touch-pan.vertical="_featureTouchPanHandler" v-if="isShowPan">
+        <q-icon name="mdi-minus" size="30px"/>
+      </div>
       <ShowInfo ref="ShowInfo" />
       <BarChart ref="BarChart" />
+      <LineChart ref="LineChart" />
     </div>
   </div>
 </template>
@@ -10,35 +14,59 @@
 <script>
 import ShowInfo from './ShowInfo.vue'
 import BarChart from './BarChart.vue'
+import LineChart from './LineChart.vue'
 
 export default {
   name: 'MapFeatures',
   components: {
     ShowInfo,
-    BarChart
+    BarChart,
+    LineChart
   },
   data () {
     return {
+      isShowPan: screen.width < 426,
+      isAnimation: false,
       isHideFeature: {
         showInfo: false,
-        barChart: true
+        barChart: true,
+        lineChart: true
       }
     }
   },
   methods: {
-    setIsHideFeature () {
+    setIsHideFeature (key) {
       let obj = {
-        showInfo: !this.isHideFeature.showInfo,
-        barChart: !this.isHideFeature.barChart
+        showInfo: true,
+        barChart: true,
+        lineChart: true
       }
-
+      if (key === 'showInfo') {
+        obj.showInfo = !this.isHideFeature.showInfo
+      } else if (key === 'barChart') {
+        obj.barChart = !this.isHideFeature.barChart
+      } else {
+        obj.lineChart = !this.isHideFeature.lineChart
+      }
       this.isHideFeature = Object.assign({}, this.isHideFeature, obj)
     },
     defaultIsHideFeature () {
       this.isHideFeature = Object.assign({}, this.isHideFeature, {
         showInfo: false,
-        barChart: true
+        barChart: true,
+        lineChart: true
       })
+    },
+    _featureTouchPanHandler (obj) {
+      let mf = document.getElementById('MapFeatures')
+      let verticalHeight = screen.height - obj.position.top
+
+      if (obj.direction === 'up') {
+        mf.style.height = (obj.isFinal ? screen.height : verticalHeight) + 'px'
+      } else {
+        mf.style.height = (obj.isFinal ? '30%' : verticalHeight + 'px')
+      }
+      mf.scrollTop = 0
     }
   }
 }
@@ -60,19 +88,15 @@ export default {
   overflow-y: auto
   z-index: 1000
 
+  #feature_touch_pan
+    width: 100%
+    height: 30px
+    background-color: white
+    color: #777777
+    text-align: center
+
 ::-webkit-scrollbar
-  width: 6px
-  height: 6px
-  background-color: #F5F5F5
-
-::-webkit-scrollbar-track
-  -webkit-box-shadow:inset 0 0 6px rgba(0,0,0,0.3)
-  border-radius: 50px
-  background-color: #F5F5F5
-
-::-webkit-scrollbar-thumb
-  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3)
-  border-radius: 50px
-  background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0.44, rgb(122,153,217)), color-stop(0.72, rgb(73,125,189)), color-stop(0.86, rgb(28,58,148)))
+  width: 0
+  height: 0
 
 </style>

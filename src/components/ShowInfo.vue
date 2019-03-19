@@ -3,18 +3,18 @@
     <div id="info" class="col-xs-12 col-sm-12 col-md-11">
       <div id="info_head">
         <p>{{publishTime}}</p>
-        <p @click.prevent="showBarChart(county)" v-if="county !== ''">
-          <q-icon name="mdi-map-search" />&nbsp;
-          <b>{{county}}AQI</b>
-        </p>
-        <p v-else>
-          <q-icon name="mdi-map-search" />&nbsp;
-          <b>各地AQI資訊</b>
-        </p>
+        <div class="row" @click="$parent.setIsHideFeature('showInfo')">
+          <span class="col-xs-2 col-sm-2 col-md-2">
+            <q-icon name="mdi-map-search" />
+          </span>
+          <span class="col-xs-10 col-sm-10 col-md-10">
+            <b>{{county || '各地'}}AQI資訊</b>
+          </span>
+        </div>
       </div>
       <div id="info_body" :class="{hide: $parent.isHideFeature.showInfo}">
-        <ul>
-          <li v-for="(value, index) in countyData" :key="index">
+        <ul class="sites_container">
+          <li class="site_status" v-for="(value, index) in countyData" :key="index">
             <div :class="['info_site', 'row', $parent.$parent.getColor(value.AQI)]" @click="$set(isHide, index, !isHide[index])">
               <div class="info_left col-xs-6 col-sm-6 col-md-6">
                 <p class="info_site_name">{{value.SiteName}}</p>
@@ -25,10 +25,23 @@
               </div>
             </div>
             <div :class="['more_info', {hide: isHide[index]}]">
-              <div class="row" v-for="(mean, key, idx) in keyTranslate" :key="idx">
-                <span class="col-xs-9 col-sm-9 col-md-9">{{mean}}</span>
-                <span class="col-xs-3 col-sm-3 col-md-3">{{value[key] || '無'}}</span>
-              </div>
+              <q-list v-for="(mean, substance, idx) in keyTranslate" :key="idx" class="row" highlight dense no-border>
+                <q-item class="col-xs-12 col-sm-12 col-md-12">
+                  <q-item-side>
+                    <q-btn v-if="['CO', 'NO2', 'SO2', 'O3', 'O3_AVG', 'PM10', 'PM2.5'].indexOf(substance) !== -1"
+                            @click="$parent.$refs.LineChart.showLineChart(value.SiteName, substance)"
+                            icon="mdi-chart-areaspline"
+                            size="25px"
+                            color="primary" flat round dense class="test" />
+                    <q-btn v-else icon="mdi-cancel" size="25px" color="negative" flat round dense disable />
+                  </q-item-side>
+                  <q-item-main>
+                    <q-item-tile label><b>{{mean}}</b></q-item-tile>
+                    <hr class="hr_style"/>
+                    <q-item-tile sublabel>{{value[substance] || '無'}}</q-item-tile>
+                  </q-item-main>
+                </q-item>
+              </q-list>
             </div>
           </li>
         </ul>
@@ -67,15 +80,6 @@ export default {
     }
   },
   methods: {
-    showBarChart (county) {
-      let parent = this.$parent
-      let barChart = parent.$refs.BarChart
-
-      parent.setIsHideFeature()
-      this.$nextTick(() => {
-        barChart.drawChart(county)
-      })
-    },
     updateComponent (data) {
       if (data !== undefined) {
         this.isHide = data.map(() => true)
@@ -109,24 +113,27 @@ export default {
       text-align: center
       line-height: 12px
       font-size: 12px
-    p:nth-child(2)
-      margin: 0 0 5px
-      font-size: 28px
-      text-align: center
-      color: #777777
 
-    p:nth-child(2):hover
+    div
+      padding: 5px
+
+      span
+        font-size: 24px
+        color: #777777
+        text-align: center
+
+    div:hover
       cursor: pointer
       background-color: #f1f1f1
 
   #info_body
-    ul
+    .sites_container
       display: inline
       margin: 0
       padding: 0
       list-style-type: none
 
-    li
+    .site_status
       margin: 3px 0
       padding: 5px 5px
       border-bottom: 3px dashed #aaaaaa
@@ -165,24 +172,17 @@ export default {
         border-left: 1px solid #aaaaaa
 
         .info_value
-          font-size: 35px
+          font-size: 32px
           font-weight: bolder
 
     .more_info
       padding: 5px
 
-      div
-        margin: 5px 0
-        border-bottom: 1px solid #aaaaaa
-
-        span:nth-child(1)
-          display: inline-block
-          color: #555555
-        span:nth-child(2)
-          display: inline-block
-          color: #555555
-          text-align: center
-          font-weight: bolder
+      .hr_style
+        border: 0
+        height: 1px
+        background: #333
+        background-image: linear-gradient(to right, #ccc, #333, #ccc)
 
 .gray
   color: gray

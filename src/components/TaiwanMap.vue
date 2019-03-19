@@ -15,7 +15,7 @@ import L from 'leaflet'
 // import HeatmapOverlay from 'heatmap.js/plugins/leaflet-heatmap'
 import 'leaflet/dist/leaflet.css'
 import { feature } from 'topojson/dist/topojson.min.js'
-import twCountyTopo from 'assets/twCountyTopo.json'
+import twCountyTopo from '../statics/twCountyTopo.json'
 import { map, filter } from 'ramda'
 
 delete L.Icon.Default.prototype._getIconUrl
@@ -99,6 +99,7 @@ export default {
       }
       const _this = this
       const showInfo = this.$refs.MapFeatures.$refs.ShowInfo
+      const barChart = this.$refs.MapFeatures.$refs.BarChart
       const defaultStyle = {
         weight: 1,
         opacity: 0.8,
@@ -126,6 +127,7 @@ export default {
                 _this.clickedArea = countyName
                 this.setStyle(changedStyle)
                 showInfo.updateComponent(countyData)
+                barChart.county = countyData[0].County
               } else {
                 if (_this.clickedArea !== countyName) {
                   map(isDifferentCountyName(countyName))(_this.siteLayer)
@@ -133,11 +135,13 @@ export default {
                   geoLayer.setStyle(defaultStyle)
                   this.setStyle(changedStyle)
                   showInfo.updateComponent(countyData)
+                  barChart.county = countyData[0].County
                 } else {
                   map(isSameCountyName)(_this.siteLayer)
                   _this.clickedArea = ''
                   geoLayer.setStyle(defaultStyle)
                   showInfo.updateComponent()
+                  barChart.county = ''
                 }
               }
               _this.$refs.MapFeatures.defaultIsHideFeature()
@@ -146,6 +150,7 @@ export default {
               if (_this.clickedArea === '') {
                 this.setStyle(changedStyle)
                 showInfo.updateComponent(countyData)
+                barChart.county = countyData[0].County
                 _this.$refs.MapFeatures.defaultIsHideFeature()
               }
             },
@@ -153,6 +158,7 @@ export default {
               if (_this.clickedArea === '') {
                 this.setStyle(defaultStyle)
                 showInfo.updateComponent()
+                barChart.county = ''
                 _this.$refs.MapFeatures.defaultIsHideFeature()
               }
             }
@@ -163,19 +169,19 @@ export default {
       return geoLayer
     },
     _getMarkerIcons () {
-      const shadowUrl = 'assets/images/marker-shadow.png'
+      const shadowUrl = 'statics/images/marker-shadow.png'
       const shadowAnchor = [20, 37]
       const iconAnchor = [24, 43]
       const tooltipAnchor = [14, -30]
 
       return {
-        green: L.icon({ iconUrl: 'assets/images/marker-green.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor }),
-        yellow: L.icon({ iconUrl: 'assets/images/marker-yellow.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor }),
-        darkOrange: L.icon({ iconUrl: 'assets/images/marker-darkOrange.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor }),
-        red: L.icon({ iconUrl: 'assets/images/marker-red.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor }),
-        purple: L.icon({ iconUrl: 'assets/images/marker-purple.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor }),
-        darkred: L.icon({ iconUrl: 'assets/images/marker-darkred.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor }),
-        gray: L.icon({ iconUrl: 'assets/images/marker-gray.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor })
+        green: L.icon({ iconUrl: 'statics/images/marker-green.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor }),
+        yellow: L.icon({ iconUrl: 'statics/images/marker-yellow.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor }),
+        darkOrange: L.icon({ iconUrl: 'statics/images/marker-darkOrange.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor }),
+        red: L.icon({ iconUrl: 'statics/images/marker-red.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor }),
+        purple: L.icon({ iconUrl: 'statics/images/marker-purple.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor }),
+        darkred: L.icon({ iconUrl: 'statics/images/marker-darkred.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor }),
+        gray: L.icon({ iconUrl: 'statics/images/marker-gray.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor })
       }
     },
     _getSiteLayer (countyLayer) {
@@ -183,10 +189,15 @@ export default {
       const siteLayer = []
       const markerIcons = this._getMarkerIcons()
       const showInfo = this.$refs.MapFeatures.$refs.ShowInfo
+      const triggerClick = new MouseEvent('click', {
+        view: window,
+        bubbles: true,
+        cancelable: true
+      })
       let color = ''
       let marker = {}
 
-      _this.aqiData.forEach((value) => {
+      _this.aqiData.forEach(value => {
         color = _this.getColor(value.AQI)
         marker = L.marker([value.Latitude, value.Longitude], { icon: markerIcons[color] }).on({
           click () {
@@ -196,17 +207,17 @@ export default {
             } else {
               if (_this.clickedArea !== value.SiteName) {
                 _this.clickedArea = value.SiteName
-                countyLayer.setStyle(countyLayer.options.style)
                 showInfo.updateComponent([value])
               } else {
                 _this.clickedArea = ''
-                countyLayer.setStyle(countyLayer.options.style)
                 showInfo.updateComponent()
               }
             }
+            let currentArea = Object.values(filter(d => d.feature.properties.COUNTYNAME === value.County)(countyLayer._layers))[0]
+            currentArea._path.dispatchEvent(triggerClick)
             _this.$refs.MapFeatures.defaultIsHideFeature()
           }
-        }).bindTooltip(value.SiteName + ': ' + value.AQI)
+        }).bindTooltip(value.SiteName + ': ' + (value.AQI || 0))
 
         siteLayer.push(Object.assign(marker, { _county: value.County }))
       })
@@ -234,12 +245,14 @@ export default {
     },
     _getAqiJsonData () {
       return new Promise((resolve, reject) => {
+        this.$q.loading.show()
         jsonp('https://opendata.epa.gov.tw/api/v1/AQI?$skip=0&$top=1000&$format=json', null, (err, res) => {
           if (err) {
             reject(err)
           } else {
             resolve(res)
           }
+          this.$q.loading.hide()
         })
       })
     }
@@ -247,7 +260,7 @@ export default {
   mounted () {
     const _this = this
 
-    _this._getAqiJsonData().then((res) => {
+    _this._getAqiJsonData().then(res => {
       if (res.length > 0) {
         _this.aqiData = res
         const baseLayer = _this._getBaseLayer()

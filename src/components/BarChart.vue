@@ -2,11 +2,14 @@
   <div class="row">
     <div id="bar_chart" class="col-xs-12 col-sm-12 col-md-11">
       <div id="bar_chart_head">
-        <p @click.prevent="$parent.setIsHideFeature()">
-          <q-icon name="mdi-chart-bar" />&nbsp;
-          <b v-if="county !== ''">{{county}}柱狀圖</b>
-          <b v-else>各地AQI柱狀圖</b>
-        </p>
+        <div class="row" @click="_showBarChart">
+          <span class="col-xs-2 col-sm-2 col-md-2">
+            <q-icon name="mdi-chart-bar" />
+          </span>
+          <span class="col-xs-10 col-sm-10 col-md-10">
+            <b>{{county || '各地'}}AQI柱狀圖</b>
+          </span>
+        </div>
       </div>
       <div id="bar_chart_body" :class="{hide: $parent.isHideFeature.barChart}">
         <div id="main_bar_chart">
@@ -70,10 +73,18 @@ export default {
         line: { width: 1.5 }
       }
     },
-    drawChart (county) {
-      if (county !== '' && this.county !== county) {
+    _showBarChart () {
+      const _this = this
+
+      this.$parent.setIsHideFeature('barChart')
+      this.$nextTick(() => {
+        _this.drawChart()
+      })
+    },
+    drawChart () {
+      if (this.county !== '') {
         let aqiData = this.$parent.$parent.aqiData
-        let countyData = filter(d => d.County === county)(aqiData)
+        let countyData = filter(d => d.County === this.county)(aqiData)
         let xValue = pluck('SiteName')(countyData)
         let yValue = pluck('AQI')(countyData)
         let data = [{
@@ -89,12 +100,7 @@ export default {
         let layout = {
           showlegend: false,
           autosize: true,
-          margin: {
-            l: 30,
-            r: 30,
-            b: 35,
-            t: 10
-          },
+          margin: { l: 30, r: 30, b: 45, t: 10 },
           updatemenus: [{
             direction: 'left',
             showactive: true,
@@ -126,7 +132,6 @@ export default {
 
         let config = { responsive: true, displayModeBar: false, scrollZoom: true }
         Plotly.newPlot('main_bar_chart', data, layout, config)
-        this.county = county
         this.$refs.StatusInfo.init('main_bar_chart')
       }
     }
@@ -148,13 +153,15 @@ export default {
     border-bottom: 8px solid #aaaaaa
     border-radius: 2px
 
-    p
-      margin: 0 0 5px
-      font-size: 28px
-      text-align: center
-      color: #777777
+    div
+      padding: 5px
 
-    p:hover
+      span
+        font-size: 24px
+        color: #777777
+        text-align: center
+
+    div:hover
       cursor: pointer
       background-color: #f1f1f1
 
