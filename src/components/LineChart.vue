@@ -47,7 +47,7 @@ export default {
       return new Promise((resolve, reject) => {
         if (_this.daily.length === 0) {
           this.$q.loading.show()
-          jsonp('http://opendata.epa.gov.tw/api/v1/ATM00679?$skip=0&$top=1000&$format=json', null, (err, res) => {
+          jsonp('https://opendata.epa.gov.tw/api/v1/ATM00679?$skip=0&$top=1000&$format=json', null, (err, res) => {
             if (err) {
               reject(err)
             } else {

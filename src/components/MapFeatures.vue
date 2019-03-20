@@ -62,7 +62,7 @@ export default {
       let verticalHeight = screen.height - obj.position.top
 
       if (obj.direction === 'up') {
-        mf.style.height = (obj.isFinal ? screen.height : verticalHeight) + 'px'
+        mf.style.height = verticalHeight + 'px'
       } else {
         mf.style.height = (obj.isFinal ? '30%' : verticalHeight + 'px')
       }
