@@ -3,10 +3,6 @@ const routes = [
   {
     path: '/',
     component: () => import('layouts/Main.vue')
-  },
-  {
-    path: '/*',
-    component: () => import('pages/Error404.vue')
   }
 ]
 

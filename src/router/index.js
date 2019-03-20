@@ -8,7 +8,8 @@ export default function () {
   const Router = new VueRouter({
     scrollBehavior: () => ({ y: 0 }),
     routes,
-    mode: 'history',
+    // mode: 'history',
+    mode: process.env.VUE_ROUTER_MODE,
     base: process.env.VUE_ROUTER_BASE
   })
 
