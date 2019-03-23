@@ -3,6 +3,13 @@ const routes = [
   {
     path: '/',
     component: () => import('layouts/Main.vue')
+    // component: () => import('components/LayerButtons.vue')
+    /*
+    children: [{
+      path: 'layerButtons',
+      component: () => import('components/LayerButtons.vue')
+    }]
+    */
   }
 ]
 

@@ -49,7 +49,7 @@ module.exports = function (ctx) {
         'QItemSide',
         'QItemTile',
         'QItemMain',
-        'QSpinnerCircles'
+        'QSpinnerPie'
       ],
       directives: [
         'TouchPan'
@@ -58,13 +58,13 @@ module.exports = function (ctx) {
       plugins: ['Loading'],
       config: {
         loading: {
-          spinner: 'QSpinnerCircles',
+          spinner: 'QSpinnerPie',
           message: 'Now Loading',
           spinnerSize: 150
         }
-      }
+      },
       // iconSet: ctx.theme.mat ? 'material-icons' : 'ionicons'
-      // i18n: 'de' // Quasar language
+      // i18n: 'zh-TW' // Quasar language
     },
     // animations: 'all' --- includes all animations
     animations: [],

@@ -15,7 +15,8 @@
     "leaflet": "^1.4.0",
     "plotly.js-dist": "^1.44.4",
     "ramda": "^0.26.1",
-    "topojson": "^3.0.2"
+    "topojson": "^3.0.2",
+    "heatmap.js": "^2.0.5"
   },
   "devDependencies": {
     "@vue/eslint-config-standard": "^4.0.0",

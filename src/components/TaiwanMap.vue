@@ -3,16 +3,19 @@
     <div class="map" id="map"></div>
     <MapFeatures ref="MapFeatures"/>
     <ColorInfo ref="ColorInfo" />
+    <LayerButtons ref="LayerButtons" />
   </div>
 </template>
 
 <script>
+/* eslint no-unused-vars: ["error", { "varsIgnorePattern": "h337" }] */
 import MapFeatures from './MapFeatures.vue'
 import ColorInfo from './ColorInfo.vue'
+import LayerButtons from './LayerButtons.vue'
 import jsonp from 'jsonp'
 import L from 'leaflet'
-// import h337 from 'heatmap.js'
-// import HeatmapOverlay from 'heatmap.js/plugins/leaflet-heatmap'
+import h337 from 'heatmap.js'
+import HeatmapOverlay from 'heatmap.js/plugins/leaflet-heatmap'
 import 'leaflet/dist/leaflet.css'
 import { feature } from 'topojson/dist/topojson.min.js'
 import twCountyTopo from '../statics/twCountyTopo.json'
@@ -24,18 +27,20 @@ L.Icon.Default.mergeOptions({
   iconUrl: require('leaflet/dist/images/marker-icon.png'),
   shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 })
-
+/* exported h337 */
 export default {
   name: 'TaiwanMap',
   components: {
     MapFeatures,
-    ColorInfo
+    ColorInfo,
+    LayerButtons
   },
   data () {
     return {
       aqiData: [],
       clickedArea: '',
       siteLayer: [],
+      heatmap: [],
       map: {}
     }
   },
@@ -51,10 +56,9 @@ export default {
       return baseLayer
     },
     _getHeatmapLayer () {
-      /*
       const heatmapLayer = new HeatmapOverlay({
         radius: 20,
-        maxOpacity: .5,
+        maxOpacity: 0.5,
         scaleRadius: false,
         useLocalExtrema: true,
         latField: 'Latitude',
@@ -69,7 +73,6 @@ export default {
       })
 
       return heatmapLayer
-      */
     },
     _getCountyLayer () {
       const isEmptyCountyName = countyName => {
@@ -119,25 +122,32 @@ export default {
           let props = feature.properties
           let countyName = props.name
           let countyData = filter(d => d.County === countyName)(_this.aqiData)
+          let lb = _this.$refs.LayerButtons
 
           layer.on({
             click () {
               if (_this.clickedArea === '') {
-                map(isEmptyCountyName(countyName))(_this.siteLayer)
+                if (!lb.isMarkerRemoved) {
+                  map(isEmptyCountyName(countyName))(_this.siteLayer)
+                }
                 _this.clickedArea = countyName
                 this.setStyle(changedStyle)
                 showInfo.updateComponent(countyData)
                 barChart.county = countyData[0].County
               } else {
                 if (_this.clickedArea !== countyName) {
-                  map(isDifferentCountyName(countyName))(_this.siteLayer)
+                  if (!lb.isMarkerRemoved) {
+                    map(isDifferentCountyName(countyName))(_this.siteLayer)
+                  }
                   _this.clickedArea = countyName
                   geoLayer.setStyle(defaultStyle)
                   this.setStyle(changedStyle)
                   showInfo.updateComponent(countyData)
                   barChart.county = countyData[0].County
                 } else {
-                  map(isSameCountyName)(_this.siteLayer)
+                  if (!lb.isMarkerRemoved) {
+                    map(isSameCountyName)(_this.siteLayer)
+                  }
                   _this.clickedArea = ''
                   geoLayer.setStyle(defaultStyle)
                   showInfo.updateComponent()
@@ -245,40 +255,40 @@ export default {
     },
     _getAqiJsonData () {
       return new Promise((resolve, reject) => {
-        this.$q.loading.show()
         jsonp('https://opendata.epa.gov.tw/api/v1/AQI?$skip=0&$top=1000&$format=json', null, (err, res) => {
           if (err) {
             reject(err)
           } else {
             resolve(res)
           }
-          this.$q.loading.hide()
         })
       })
     }
   },
   mounted () {
     const _this = this
-
+    this.$q.loading.show()
     _this._getAqiJsonData().then(res => {
       if (res.length > 0) {
         _this.aqiData = res
         const baseLayer = _this._getBaseLayer()
         const countyLayer = _this._getCountyLayer()
         _this.siteLayer = _this._getSiteLayer(countyLayer)
+        _this.heatmap = _this._getHeatmapLayer()
         _this.map = new L.Map('map', {
           center: new L.LatLng(23.97361, 120.98064),
           zoom: 8,
           layers: [
             baseLayer,
             countyLayer
-            // _this._getHeatmapLayer()
           ].concat(_this.siteLayer)
         })
+        this.$q.loading.hide()
       }
     }).catch(err => {
       alert('Service Unavailable Temporarily')
       console.log(err)
+      this.$q.loading.hide()
     })
   }
 }

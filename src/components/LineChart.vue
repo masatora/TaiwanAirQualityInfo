@@ -4,7 +4,7 @@
       <div id="line_chart_head">
         <div class="row" @click="$parent.setIsHideFeature('lineChart')">
           <span class="col-xs-2 col-sm-2 col-md-2">
-            <q-icon name="mdi-chart-areaspline" />
+            <q-icon name="mdi-chart-areaspline" color="primary" />
           </span>
           <span class="col-xs-10 col-sm-10 col-md-10">
             <b>{{siteName}}每日監測資料</b>
@@ -91,6 +91,7 @@ export default {
             }
           })
           const axisStyle = {
+            fixedrange: true,
             linecolor: 'rgb(204,204,204)',
             linewidth: 2,
             ticks: 'outside',
@@ -106,7 +107,7 @@ export default {
           let layout = {
             showlegend: false,
             autosize: true,
-            margin: { l: 30, r: 30, b: 45, t: 10 },
+            margin: { l: 30, r: 30, b: 50, t: 10 },
             xaxis: Object.assign({}, axisStyle, {
               autotick: false,
               tickformat: '%m/%d'
@@ -128,7 +129,7 @@ export default {
               })
             }]
           }
-          let config = { responsive: true, displayModeBar: false, scrollZoom: true }
+          let config = { responsive: true, displayModeBar: false, scrollZoom: false }
           Plotly.newPlot('main_line_chart', data, layout, config)
         }
       }).catch(err => {

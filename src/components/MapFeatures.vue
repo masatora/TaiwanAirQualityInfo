@@ -1,8 +1,11 @@
 <template>
   <div class="row">
-    <div id="MapFeatures" class="col-xs-12 col-sm-12 col-md-4 absolute-bottom-right">
-      <div id="feature_touch_pan" v-touch-pan.vertical="_featureTouchPanHandler" v-if="isShowPan">
+    <div id="MapFeatures"
+         class="col-xs-12 col-sm-12 col-md-4 absolute-bottom-right"
+         :style="mfStyle">
+      <div id="feature_touch_pan" v-touch-pan.vertical.prevent="_featureTouchPanHandler" v-if="isShowPan">
         <q-icon name="mdi-minus" size="30px"/>
+        <p>{{pText}}</p>
       </div>
       <ShowInfo ref="ShowInfo" />
       <BarChart ref="BarChart" />
@@ -26,11 +29,16 @@ export default {
   data () {
     return {
       isShowPan: screen.width < 426,
-      isAnimation: false,
       isHideFeature: {
         showInfo: false,
         barChart: true,
         lineChart: true
+      },
+      pText: '上下捲動此軸以顯示內容',
+      mfStyle: {
+        height: '',
+        bottom: '',
+        overflowY: ''
       }
     }
   },
@@ -58,26 +66,42 @@ export default {
       })
     },
     _featureTouchPanHandler (obj) {
-      let mf = document.getElementById('MapFeatures')
-      let verticalHeight = screen.height - obj.position.top
-
+      this.$set(this.mfStyle, 'overflowY', 'hidden')
       if (obj.direction === 'up') {
-        mf.style.height = verticalHeight + 'px'
+        if (obj.position.top < (window.outerHeight - 160)) {
+          this.pText = '向下捲動此軸以隱藏內容'
+          this.$set(this.mfStyle, 'overflowY', 'auto')
+          this.$set(this.mfStyle, 'bottom', (obj.isFinal ? window.outerHeight : (window.outerHeight - obj.position.top)) + 'px')
+        } else {
+          this.pText = '上下捲動此軸以顯示內容'
+          this.$set(this.mfStyle, 'bottom', '160px')
+        }
       } else {
-        mf.style.height = (obj.isFinal ? '30%' : verticalHeight + 'px')
+        if (obj.position.top > (window.outerHeight - 160)) {
+          this.pText = '向上捲動此軸以顯示內容'
+          this.$set(this.mfStyle, 'bottom', '60px')
+        } else {
+          this.pText = '上下捲動此軸以顯示內容'
+          this.$set(this.mfStyle, 'bottom', (obj.isFinal ? '160px' : (window.outerHeight - obj.position.top) + 'px'))
+        }
       }
-      mf.scrollTop = 0
+    }
+  },
+  mounted () {
+    if (screen.width < 425) {
+      this.$set(this.mfStyle, 'height', window.outerHeight + 'px')
     }
   }
 }
 </script>
 
 <style lang="stylus">
-@media (min-width: 320px), (max-width: 425px)
+@media screen and (max-width: 425px)
   #MapFeatures
-    height: 30%
+    position: relative
+    bottom: 160px
 
-@media (min-width: 768px)
+@media screen and (min-width: 768px)
   #MapFeatures
     height: 100%
 
@@ -90,10 +114,13 @@ export default {
 
   #feature_touch_pan
     width: 100%
-    height: 30px
+    height: 60px
     background-color: white
     color: #777777
     text-align: center
+
+    p
+      margin: 0
 
 ::-webkit-scrollbar
   width: 0

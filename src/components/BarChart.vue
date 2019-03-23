@@ -4,7 +4,7 @@
       <div id="bar_chart_head">
         <div class="row" @click="_showBarChart">
           <span class="col-xs-2 col-sm-2 col-md-2">
-            <q-icon name="mdi-chart-bar" />
+            <q-icon name="mdi-chart-bar" color="primary" />
           </span>
           <span class="col-xs-10 col-sm-10 col-md-10">
             <b>{{county || '各地'}}AQI柱狀圖</b>
@@ -100,7 +100,9 @@ export default {
         let layout = {
           showlegend: false,
           autosize: true,
-          margin: { l: 30, r: 30, b: 45, t: 10 },
+          margin: { l: 30, r: 30, b: 50, t: 10 },
+          xaxis: { fixedrange: true },
+          yaxis: { fixedrange: true },
           updatemenus: [{
             direction: 'left',
             showactive: true,
@@ -130,7 +132,7 @@ export default {
           }]
         }
 
-        let config = { responsive: true, displayModeBar: false, scrollZoom: true }
+        let config = { responsive: true, displayModeBar: false, scrollZoom: false }
         Plotly.newPlot('main_bar_chart', data, layout, config)
         this.$refs.StatusInfo.init('main_bar_chart')
       }

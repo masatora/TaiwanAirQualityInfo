@@ -5,7 +5,7 @@
         <p>{{publishTime}}</p>
         <div class="row" @click="$parent.setIsHideFeature('showInfo')">
           <span class="col-xs-2 col-sm-2 col-md-2">
-            <q-icon name="mdi-map-search" />
+            <q-icon name="mdi-map-search" color="positive" />
           </span>
           <span class="col-xs-10 col-sm-10 col-md-10">
             <b>{{county || '各地'}}AQI資訊</b>
@@ -28,11 +28,12 @@
               <q-list v-for="(mean, substance, idx) in keyTranslate" :key="idx" class="row" highlight dense no-border>
                 <q-item class="col-xs-12 col-sm-12 col-md-12">
                   <q-item-side>
-                    <q-btn v-if="['CO', 'NO2', 'SO2', 'O3', 'O3_AVG', 'PM10', 'PM2.5'].indexOf(substance) !== -1"
-                            @click="$parent.$refs.LineChart.showLineChart(value.SiteName, substance)"
-                            icon="mdi-chart-areaspline"
-                            size="25px"
-                            color="primary" flat round dense class="test" />
+                    <q-btn v-if="['屏東(琉球)','彰化(大城)', '臺南(北門)'].indexOf(value.SiteName) === -1 &&
+                                 ['CO', 'NO2', 'SO2', 'O3', 'O3_AVG', 'PM10', 'PM2.5'].indexOf(substance) !== -1"
+                           @click="$parent.$refs.LineChart.showLineChart(value.SiteName, substance)"
+                           icon="mdi-chart-areaspline"
+                           size="25px"
+                           color="primary" flat round dense />
                     <q-btn v-else icon="mdi-cancel" size="25px" color="negative" flat round dense disable />
                   </q-item-side>
                   <q-item-main>
