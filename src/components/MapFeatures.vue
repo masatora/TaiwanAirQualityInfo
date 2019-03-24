@@ -34,7 +34,7 @@ export default {
         barChart: true,
         lineChart: true
       },
-      pText: '上下捲動此軸以顯示內容',
+      pText: '上下捲動此軸以顯示或隱藏內容',
       mfStyle: {
         height: '',
         bottom: '',
@@ -73,7 +73,7 @@ export default {
           this.$set(this.mfStyle, 'overflowY', 'auto')
           this.$set(this.mfStyle, 'bottom', (obj.isFinal ? window.outerHeight : (window.outerHeight - obj.position.top)) + 'px')
         } else {
-          this.pText = '上下捲動此軸以顯示內容'
+          this.pText = '上下捲動此軸以顯示或隱藏內容'
           this.$set(this.mfStyle, 'bottom', '160px')
         }
       } else {
@@ -81,7 +81,7 @@ export default {
           this.pText = '向上捲動此軸以顯示內容'
           this.$set(this.mfStyle, 'bottom', '60px')
         } else {
-          this.pText = '上下捲動此軸以顯示內容'
+          this.pText = '上下捲動此軸以顯示或隱藏內容'
           this.$set(this.mfStyle, 'bottom', (obj.isFinal ? '160px' : (window.outerHeight - obj.position.top) + 'px'))
         }
       }
@@ -96,7 +96,7 @@ export default {
 </script>
 
 <style lang="stylus">
-@media screen and (max-width: 425px)
+@media screen and (max-width: 426px)
   #MapFeatures
     position: relative
     bottom: 160px

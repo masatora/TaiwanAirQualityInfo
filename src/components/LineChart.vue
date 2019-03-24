@@ -124,7 +124,11 @@ export default {
                 return {
                   method: 'restyle',
                   label: d.name,
-                  args: [{ visible: [0, 1, 2, 3, 4, 5, 6, 7].map(v => v === i) }]
+                  args: [{
+                    y: [d.y],
+                    name: [d.name],
+                    visible: [0, 1, 2, 3, 4, 5, 6, 7].map(v => v === i)
+                  }]
                 }
               })
             }]

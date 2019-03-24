@@ -33,6 +33,7 @@ export default {
   methods: {
     toggleMarker () {
       let method
+
       if (this.isMarkerRemoved) {
         method = d => {
           let cn = this.$parent.$refs.MapFeatures.$refs.BarChart.county
