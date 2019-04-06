@@ -26,7 +26,7 @@ export default {
           let x = data.event.pointerX
           let y = data.event.pointerY
           let xOffset = ((x + 180) > document.getElementById('bar_chart').offsetWidth) ? 150 : 0
-          let yOffset = 30 + 150
+          let yOffset = 157 + 150
 
           statusInfo.style.left = (x - xOffset) + 'px'
           statusInfo.style.top = (y + yOffset) + 'px'

@@ -1,10 +1,11 @@
 <template>
   <div class="row">
-    <div id="bar_chart" class="col-xs-12 col-sm-12 col-md-11">
-      <div id="bar_chart_head">
-        <div class="row" @click="_showBarChart">
+    <div id="bar_chart" class="col-xs-12 col-sm-12 col-md-12">
+      <div id="bar_chart_head" @click="_showBarChart">
+        <p>&nbsp;</p>
+        <div class="row">
           <span class="col-xs-2 col-sm-2 col-md-2">
-            <q-icon name="mdi-chart-bar" color="primary" />
+            <q-icon name="mdi-chart-bar" />
           </span>
           <span class="col-xs-10 col-sm-10 col-md-10">
             <b>{{county || '各地'}}AQI柱狀圖</b>
@@ -145,27 +146,31 @@ export default {
 #bar_chart
   margin: 10px auto
   height: auto
-  padding: 6px 8px
-  background: white
-  border-radius: 5px
+  padding: 0 0 1px 0
   overflow-x: hidden
   box-shadow: 3px 3px 3px #777777
+  background-color: white
 
   #bar_chart_head
     border-bottom: 8px solid #aaaaaa
-    border-radius: 2px
+    background-color: #0b5bd5
+    color: #fafafa
+
+    p:nth-child(1)
+      text-align: center
+      line-height: 12px
+      font-size: 12px
 
     div
       padding: 5px
 
       span
         font-size: 24px
-        color: #777777
         text-align: center
 
-    div:hover
+  #bar_chart_head:hover
       cursor: pointer
-      background-color: #f1f1f1
+      background-color: #2075f4
 
   #bar_chart_body
     width: 100%

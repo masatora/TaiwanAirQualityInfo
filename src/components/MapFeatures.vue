@@ -7,6 +7,7 @@
         <q-icon name="mdi-minus" size="30px"/>
         <p>{{pText}}</p>
       </div>
+      <SearchKeyWord ref="SearchKeyWord" />
       <ShowInfo ref="ShowInfo" />
       <BarChart ref="BarChart" />
       <LineChart ref="LineChart" />
@@ -15,6 +16,7 @@
 </template>
 
 <script>
+import SearchKeyWord from './SearchKeyWord.vue'
 import ShowInfo from './ShowInfo.vue'
 import BarChart from './BarChart.vue'
 import LineChart from './LineChart.vue'
@@ -22,6 +24,7 @@ import LineChart from './LineChart.vue'
 export default {
   name: 'MapFeatures',
   components: {
+    SearchKeyWord,
     ShowInfo,
     BarChart,
     LineChart
@@ -32,7 +35,8 @@ export default {
       isHideFeature: {
         showInfo: false,
         barChart: true,
-        lineChart: true
+        lineChart: true,
+        searchKeyWord: true
       },
       pText: '上下捲動此軸以顯示或隱藏內容',
       mfStyle: {
@@ -43,18 +47,21 @@ export default {
     }
   },
   methods: {
-    setIsHideFeature (key) {
+    setIsHideFeature (key, bool) {
       let obj = {
         showInfo: true,
         barChart: true,
-        lineChart: true
+        lineChart: true,
+        searchKeyWord: true
       }
       if (key === 'showInfo') {
-        obj.showInfo = !this.isHideFeature.showInfo
+        obj.showInfo = (bool !== undefined ? bool : !this.isHideFeature.showInfo)
       } else if (key === 'barChart') {
-        obj.barChart = !this.isHideFeature.barChart
+        obj.barChart = (bool !== undefined ? bool : !this.isHideFeature.barChart)
+      } else if (key === 'lineChart') {
+        obj.lineChart = (bool !== undefined ? bool : !this.isHideFeature.lineChart)
       } else {
-        obj.lineChart = !this.isHideFeature.lineChart
+        obj.searchKeyWord = (bool !== undefined ? bool : !this.isHideFeature.searchKeyWord)
       }
       this.isHideFeature = Object.assign({}, this.isHideFeature, obj)
     },
@@ -62,7 +69,8 @@ export default {
       this.isHideFeature = Object.assign({}, this.isHideFeature, {
         showInfo: false,
         barChart: true,
-        lineChart: true
+        lineChart: true,
+        searchKeyWord: true
       })
     },
     _featureTouchPanHandler (obj) {
@@ -100,13 +108,14 @@ export default {
   #MapFeatures
     position: relative
     bottom: 160px
+    border-top: 1px solid #aaaaaa
 
 @media screen and (min-width: 768px)
   #MapFeatures
+    border-left: 1px solid #aaaaaa
     height: 100%
 
 #MapFeatures
-  border: 2px solid #aaaaaa
   background-color: #dddddd
   overflow-x: hidden
   overflow-y: auto

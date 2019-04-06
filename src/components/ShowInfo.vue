@@ -1,11 +1,11 @@
 <template>
   <div class="row">
-    <div id="info" class="col-xs-12 col-sm-12 col-md-11">
-      <div id="info_head">
-        <p>{{publishTime}}</p>
-        <div class="row" @click="$parent.setIsHideFeature('showInfo')">
+    <div id="info" class="col-xs-12 col-sm-12 col-md-12">
+      <div id="info_head" @click="$parent.setIsHideFeature('showInfo')">
+        <p>{{publishTime || '&nbsp;'}}</p>
+        <div class="row">
           <span class="col-xs-2 col-sm-2 col-md-2">
-            <q-icon name="mdi-map-search" color="positive" />
+            <q-icon name="mdi-map-search" />
           </span>
           <span class="col-xs-10 col-sm-10 col-md-10">
             <b>{{county || '各地'}}AQI資訊</b>
@@ -101,14 +101,14 @@ export default {
 <style lang="stylus">
 #info
   margin: 10px auto
-  padding: 6px 8px
-  background: white
-  border-radius: 5px
+  padding: 0 0 1px 0
   box-shadow: 3px 3px 3px #777777
+  background-color: white
 
   #info_head
     border-bottom: 8px solid #aaaaaa
-    border-radius: 2px
+    background-color: #27a033
+    color: #fafafa
 
     p:nth-child(1)
       text-align: center
@@ -120,12 +120,11 @@ export default {
 
       span
         font-size: 24px
-        color: #777777
         text-align: center
 
-    div:hover
-      cursor: pointer
-      background-color: #f1f1f1
+  #info_head:hover
+    cursor: pointer
+    background-color: #2cb639
 
   #info_body
     .sites_container
@@ -147,6 +146,7 @@ export default {
       clear: both
       height: 70px
       border-radius: 3px
+      font-weight: bolder
 
       .info_left
         float: left

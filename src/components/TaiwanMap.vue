@@ -27,7 +27,6 @@ L.Icon.Default.mergeOptions({
   iconUrl: require('leaflet/dist/images/marker-icon.png'),
   shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 })
-/* exported h337 */
 export default {
   name: 'TaiwanMap',
   components: {
@@ -40,8 +39,22 @@ export default {
       aqiData: [],
       clickedArea: '',
       siteLayer: [],
+      countyLayer: [],
       heatmap: [],
-      map: {}
+      map: {},
+      defaultCountyStyle: {
+        weight: 1,
+        opacity: 0.8,
+        color: '#aaaaaa',
+        fillOpacity: 0.2,
+        fillColor: '#fafafa'
+      },
+      changeCountyStyle: {
+        weight: 5,
+        color: '#ffffff',
+        fillOpacity: 0.7,
+        fillColor: '#111111'
+      }
     }
   },
   methods: {
@@ -74,50 +87,35 @@ export default {
 
       return heatmapLayer
     },
+    _isEmptyCountyName (countyName) {
+      return d => {
+        if (d._county !== countyName) {
+          d._icon.style.opacity = 0.2
+          d._shadow.style.opacity = 0.2
+        }
+      }
+    },
+    _isSameCountyName (d) {
+      d._icon.style.opacity = 1
+      d._shadow.style.opacity = 1
+    },
+    _isDifferentCountyName (countyName) {
+      return d => {
+        if (d._county === countyName) {
+          d._icon.style.opacity = 1
+          d._shadow.style.opacity = 1
+        } else {
+          d._icon.style.opacity = 0.2
+          d._shadow.style.opacity = 0.2
+        }
+      }
+    },
     _getCountyLayer () {
-      const isEmptyCountyName = countyName => {
-        const cn = countyName
-        return d => {
-          if (d._county !== cn) {
-            d._icon.style.opacity = 0.2
-            d._shadow.style.opacity = 0.2
-          }
-        }
-      }
-      const isSameCountyName = d => {
-        d._icon.style.opacity = 1
-        d._shadow.style.opacity = 1
-      }
-      const isDifferentCountyName = countyName => {
-        const cn = countyName
-        return d => {
-          if (d._county === cn) {
-            d._icon.style.opacity = 1
-            d._shadow.style.opacity = 1
-          } else {
-            d._icon.style.opacity = 0.2
-            d._shadow.style.opacity = 0.2
-          }
-        }
-      }
       const _this = this
       const showInfo = this.$refs.MapFeatures.$refs.ShowInfo
       const barChart = this.$refs.MapFeatures.$refs.BarChart
-      const defaultStyle = {
-        weight: 1,
-        opacity: 0.8,
-        color: '#aaaaaa',
-        fillOpacity: 0.2,
-        fillColor: '#fafafa'
-      }
-      const changedStyle = {
-        weight: 5,
-        color: '#ffffff',
-        fillOpacity: 0.7,
-        fillColor: '#111111'
-      }
       const geoLayer = L.geoJSON(feature(twCountyTopo, twCountyTopo.objects['layer1']), {
-        style: defaultStyle,
+        style: _this.defaultCountyStyle,
         onEachFeature (feature, layer) {
           let props = feature.properties
           let countyName = props.name
@@ -128,28 +126,28 @@ export default {
             click () {
               if (_this.clickedArea === '') {
                 if (!lb.isMarkerRemoved) {
-                  map(isEmptyCountyName(countyName))(_this.siteLayer)
+                  map(_this._isEmptyCountyName(countyName))(_this.siteLayer)
                 }
                 _this.clickedArea = countyName
-                this.setStyle(changedStyle)
+                this.setStyle(_this.changeCountyStyle)
                 showInfo.updateComponent(countyData)
                 barChart.county = countyData[0].County
               } else {
                 if (_this.clickedArea !== countyName) {
                   if (!lb.isMarkerRemoved) {
-                    map(isDifferentCountyName(countyName))(_this.siteLayer)
+                    map(_this._isDifferentCountyName(countyName))(_this.siteLayer)
                   }
                   _this.clickedArea = countyName
-                  geoLayer.setStyle(defaultStyle)
-                  this.setStyle(changedStyle)
+                  geoLayer.setStyle(_this.defaultCountyStyle)
+                  this.setStyle(_this.changeCountyStyle)
                   showInfo.updateComponent(countyData)
                   barChart.county = countyData[0].County
                 } else {
                   if (!lb.isMarkerRemoved) {
-                    map(isSameCountyName)(_this.siteLayer)
+                    map(_this._isSameCountyName)(_this.siteLayer)
                   }
                   _this.clickedArea = ''
-                  geoLayer.setStyle(defaultStyle)
+                  geoLayer.setStyle(_this.defaultCountyStyle)
                   showInfo.updateComponent()
                   barChart.county = ''
                 }
@@ -158,7 +156,7 @@ export default {
             },
             mouseover () {
               if (_this.clickedArea === '') {
-                this.setStyle(changedStyle)
+                this.setStyle(_this.changeCountyStyle)
                 showInfo.updateComponent(countyData)
                 barChart.county = countyData[0].County
                 _this.$refs.MapFeatures.defaultIsHideFeature()
@@ -166,7 +164,7 @@ export default {
             },
             mouseout () {
               if (_this.clickedArea === '') {
-                this.setStyle(defaultStyle)
+                this.setStyle(_this.defaultCountyStyle)
                 showInfo.updateComponent()
                 barChart.county = ''
                 _this.$refs.MapFeatures.defaultIsHideFeature()
@@ -177,6 +175,27 @@ export default {
       })
 
       return geoLayer
+    },
+    setCountyLayer (type, county) {
+      const countyLayer = Object.values(filter(d => d.feature.properties.COUNTYNAME === county)(this.countyLayer._layers))
+
+      if (countyLayer.length === 1) {
+        const lb = this.$refs.LayerButtons
+
+        if (!lb.isMarkerRemoved) {
+          if (type === 1) {
+            map(this._isEmptyCountyName(county))(this.siteLayer)
+            countyLayer[0].setStyle(this.changeCountyStyle)
+          } else if (type === 2) {
+            map(this._isDifferentCountyName(county))(this.siteLayer)
+            this.countyLayer.setStyle(this.defaultCountyStyle)
+            countyLayer[0].setStyle(this.changeCountyStyle)
+          } else {
+            map(this._isSameCountyName)(this.siteLayer)
+            this.countyLayer.setStyle(this.defaultCountyStyle)
+          }
+        }
+      }
     },
     _getMarkerIcons () {
       const shadowUrl = 'statics/images/marker-shadow.png'
@@ -194,16 +213,11 @@ export default {
         gray: L.icon({ iconUrl: 'statics/images/marker-gray.png', shadowUrl, shadowAnchor, iconAnchor, tooltipAnchor })
       }
     },
-    _getSiteLayer (countyLayer) {
+    _getSiteLayer () {
       const _this = this
       const siteLayer = []
       const markerIcons = this._getMarkerIcons()
       const showInfo = this.$refs.MapFeatures.$refs.ShowInfo
-      const triggerClick = new MouseEvent('click', {
-        view: window,
-        bubbles: true,
-        cancelable: true
-      })
       let color = ''
       let marker = {}
 
@@ -213,19 +227,19 @@ export default {
           click () {
             if (_this.clickedArea === '') {
               _this.clickedArea = value.SiteName
+              _this.setCountyLayer(1, value.County)
               showInfo.updateComponent([value])
             } else {
               if (_this.clickedArea !== value.SiteName) {
                 _this.clickedArea = value.SiteName
+                _this.setCountyLayer(2, value.County)
                 showInfo.updateComponent([value])
               } else {
                 _this.clickedArea = ''
+                _this.setCountyLayer(3, value.County)
                 showInfo.updateComponent()
               }
             }
-            let currentArea = Object.values(filter(d => d.feature.properties.COUNTYNAME === value.County)(countyLayer._layers))[0]
-            currentArea._path.dispatchEvent(triggerClick)
-            _this.$refs.MapFeatures.defaultIsHideFeature()
           }
         }).bindTooltip(value.SiteName + ': ' + (value.AQI || 0))
 
@@ -272,22 +286,21 @@ export default {
       if (res.length > 0) {
         _this.aqiData = res
         const baseLayer = _this._getBaseLayer()
-        const countyLayer = _this._getCountyLayer()
-        _this.siteLayer = _this._getSiteLayer(countyLayer)
+        _this.countyLayer = _this._getCountyLayer()
+        _this.siteLayer = _this._getSiteLayer()
         _this.heatmap = _this._getHeatmapLayer()
         _this.map = new L.Map('map', {
           center: new L.LatLng(23.97361, 120.98064),
           zoom: 8,
           layers: [
             baseLayer,
-            countyLayer
+            _this.countyLayer
           ].concat(_this.siteLayer)
         })
         this.$q.loading.hide()
       }
-    }).catch(err => {
+    }).catch(() => {
       alert('Service Unavailable Temporarily')
-      console.log(err)
       this.$q.loading.hide()
     })
   }
