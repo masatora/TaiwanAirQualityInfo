@@ -37,7 +37,7 @@ export default {
   width: 280px
   height: 220px
   font-size: 14px
-  border: 2px solid #aaaaaa
+  border: 1px solid #aaaaaa
   background-color: #dddddd
   z-index: 1000
 

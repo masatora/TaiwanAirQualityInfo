@@ -1,5 +1,5 @@
 <template>
-  <div class="row desktop-only">
+  <div class="row">
     <div id="search_key_word" class="col-xs-12 col-sm-12 col-md-12">
       <div id="btn_wrap" @click.stop="Object.keys(spots).length > 0 ? $parent.setIsHideFeature('searchKeyWord') : $parent.setIsHideFeature('searchKeyWord', true)">
         <q-btn id="btn_style"
@@ -21,7 +21,7 @@
         </span>
         <span class="col-md-10" v-else>
           <div class="row">
-            <span class="col-md-6 selection_style" :class="{ hidden: isHideFilter }">
+            <span class="col-md-6 selection_style">
               <q-select
                 v-model="selectParameter"
                 :options="parameters"
@@ -29,7 +29,7 @@
                 @input="inputValue = ''; $parent.setIsHideFeature('searchKeyWord', true)"
               />
             </span>
-            <span class="col-md-3 selection_style" :class="{ hidden: isHideFilter }">
+            <span class="col-md-3 selection_style">
               <q-select
                 v-model="selectSymbol"
                 :options="symbols"
@@ -191,18 +191,26 @@ export default {
         const siteName = items[1].innerText
 
         if (county !== '' && siteName !== '') {
+          const showInfo = this.$parent.$refs.ShowInfo
+          const barChart = this.$parent.$refs.BarChart
           const taiwanMap = this.$parent.$parent.$parent.$refs.TaiwanMap
 
           if (taiwanMap.clickedArea === '') {
             taiwanMap.clickedArea = siteName
             taiwanMap.setCountyLayer(1, county)
+            showInfo.updateComponent(filter(d => d.SiteName === siteName)(this.$parent.$parent.aqiData))
+            barChart.county = county
           } else {
             if (taiwanMap.clickedArea !== siteName) {
               taiwanMap.clickedArea = siteName
               taiwanMap.setCountyLayer(2, county)
+              showInfo.updateComponent(filter(d => d.SiteName === siteName)(this.$parent.$parent.aqiData))
+              barChart.county = county
             } else {
               taiwanMap.clickedArea = ''
               taiwanMap.setCountyLayer(3, county)
+              showInfo.updateComponent()
+              barChart.county = ''
             }
           }
         }
